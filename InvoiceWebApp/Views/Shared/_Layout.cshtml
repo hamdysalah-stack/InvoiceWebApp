@@ -1,0 +1,241 @@
+﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@inject IOptions<RequestLocalizationOptions> LocOptions
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var culture = requestCulture.RequestCulture.Culture;
+    var uiCulture = requestCulture.RequestCulture.UICulture;
+    var rtlClass = uiCulture.TextInfo.IsRightToLeft ? "rtl-layout" : "";
+}
+
+<!DOCTYPE html>
+<html lang="@culture.Name" dir="@(uiCulture.TextInfo.IsRightToLeft ? "rtl" : "ltr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Invoice Web App</title>
+    <meta name="description" content="Professional Invoice Management System">
+    <meta name="author" content="Invoice Web App">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    @if (uiCulture.TextInfo.IsRightToLeft)
+    {
+        <link rel="stylesheet" href="~/css/rtl.css" asp-append-version="true" />
+    }
+</head>
+<body class="@rtlClass d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Invoice" asp-action="Index">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    Invoice Web App
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 me-auto">
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Invoice" asp-action="Index">
+                                    <i class="fas fa-list me-1"></i>Invoices
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Invoice" asp-action="Create">
+                                    <i class="fas fa-plus me-1"></i>Create Invoice
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-1"></i>Home
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    @User.FindFirst("FullName")?.Value
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus me-1"></i>Register
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe me-1"></i>Language
+                            </a>
+                            <ul class="dropdown-menu">
+                                @foreach (var availCulture in LocOptions.Value.SupportedUICultures!)
+                                {
+                                    <li>
+                                        <form id="selectLanguageForm_@availCulture.Name"
+                                              asp-controller="Home"
+                                              asp-action="SetLanguage"
+                                              asp-route-returnUrl="@Context.Request.Path"
+                                              method="post"
+                                              class="d-inline">
+                                            <button type="submit" name="culture" value="@availCulture.Name"
+                                                    class="dropdown-item @(availCulture.Name == uiCulture.Name ? "active" : "")">
+                                                <i class="fas fa-flag me-2"></i>
+                                                @(availCulture.Name == "en-US" ? "English" : "العربية")
+                                            </button>
+                                        </form>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container flex-grow-1">
+        <main role="main" class="py-4">
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show slideInUp" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @TempData["Message"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show slideInUp" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="fadeIn">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-info-circle me-1"></i>About</a>
+                    <a href="#"><i class="fas fa-envelope me-1"></i>Contact</a>
+                    <a href="#"><i class="fas fa-shield-alt me-1"></i>Privacy</a>
+                    <a href="#"><i class="fas fa-file-contract me-1"></i>Terms</a>
+                    <a href="#"><i class="fas fa-question-circle me-1"></i>Help</a>
+                </div>
+                <div class="social-links">
+                    <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-light me-3"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <hr style="border-color: #576574;">
+            <div class="text-center">
+                <p class="mb-0">
+                    <i class="fas fa-copyright me-1"></i>
+                    2025 - Invoice Web App - Professional Invoice Management System
+                </p>
+                <small class="text-muted">Version 1.0.0 | Built with ASP.NET Core & Bootstrap</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function() {
+            // Configure Toastr
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+        @if (TempData["ToastSuccess"] != null)
+        {
+            <text>toastr.success('@Html.Raw(TempData["ToastSuccess"])');</text>
+        }
+        @if (TempData["ToastError"] != null)
+        {
+            <text>toastr.error('@Html.Raw(TempData["ToastError"])');</text>
+        }
+        @if (TempData["ToastInfo"] != null)
+        {
+            <text>toastr.info('@Html.Raw(TempData["ToastInfo"])');</text>
+        }
+        @if (TempData["ToastWarning"] != null)
+        {
+            <text>toastr.warning('@Html.Raw(TempData["ToastWarning"])');</text>
+        }
+        });
+    </script>
+</body>
+</html>

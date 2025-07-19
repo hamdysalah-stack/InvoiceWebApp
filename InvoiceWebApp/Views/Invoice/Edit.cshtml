@@ -1,0 +1,72 @@
+﻿@model InvoiceWebApp.DTOS.InvoiceDTO.CreateInvoiceDTO
+@{
+    ViewData["Title"] = "Edit Invoice";
+}
+
+<h2 class="mb-4">Edit Invoice</h2>
+
+<form asp-controller="Invoice" asp-action="Edit" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post" id="invoiceForm">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" type="date" class="form-control" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <h4>Invoice Details</h4>
+    <div id="invoiceDetailsContainer">
+        @if (Model.InvoiceDetails != null)
+        {
+            for (int i = 0; i < Model.InvoiceDetails.Count; i++)
+            {
+                <partial name="_InvoiceDetailRow" model="Model.InvoiceDetails[i]" view-data='new ViewDataDictionary(ViewData) { { "index", i } }' />
+            }
+        }
+    </div>
+
+    <button type="button" id="addRowBtn" class="btn btn-info mt-3">Add Row</button>
+    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            let detailIndex = $('#invoiceDetailsContainer .invoice-detail-row').length;
+
+            $('#addRowBtn').click(function () {
+                $.get('@Url.Action("GetInvoiceDetailRow", "Invoice")', { index: detailIndex }, function(data) {
+                    $('#invoiceDetailsContainer').append(data);
+                    detailIndex++;
+                    $.validator.unobtrusive.parse($("#invoiceDetailsContainer").last());
+                });
+            });
+
+            $(document).on('click', '.remove-row-btn', function () {
+                if ($('.invoice-detail-row').length > 1) {
+                    $(this).closest('.invoice-detail-row').remove();
+                    $('#invoiceDetailsContainer .invoice-detail-row').each(function (i) {
+                        $(this).find('input, select').each(function () {
+                            const oldName = $(this).attr('name');
+                            const newName = oldName.replace(/InvoiceDetails\[\d+\]/, `InvoiceDetails[${i}]`);
+                            $(this).attr('name', newName);
+                            const oldId = $(this).attr('id');
+                            const newId = oldId.replace(/InvoiceDetails_\d+__/, `InvoiceDetails_${i}__`);
+                            $(this).attr('id', newId);
+                        });
+                        $(this).find('[data-valmsg-for]').each(function () {
+                            const oldAttr = $(this).attr('data-valmsg-for');
+                            const newAttr = oldAttr.replace(/InvoiceDetails\[\d+\]/, `InvoiceDetails[${i}]`);
+                            $(this).attr('data-valmsg-for', newAttr);
+                        });
+                        $(this).find('.card-title').text(`Product Details #${i + 1}`);
+                    });
+                    detailIndex = $('#invoiceDetailsContainer .invoice-detail-row').length;
+                } else {
+                    alert("An invoice must have at least one product detail.");
+                }
+            });
+        });
+    </script>
+}

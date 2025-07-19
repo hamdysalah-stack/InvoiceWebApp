@@ -1,0 +1,33 @@
+﻿@model InvoiceWebApp.DTOS.InvoiceDTO.InvoiceDetailDTO
+@{
+    var index = (int)ViewData["index"];
+    var productNameId = $"InvoiceDetails_{index}__Product";
+    var quantityId = $"InvoiceDetails_{index}__Quantity";
+    var priceId = $"InvoiceDetails_{index}__Price";
+}
+
+<div class="card mb-3 invoice-detail-row">
+    <div class="card-body">
+        <h5 class="card-title">Product Details #@(index + 1)</h5>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="@productNameId" class="form-label">Product Name</label>
+                <input type="text" id="@productNameId" name="InvoiceDetails[@index].Product" class="form-control" value="@Model.Product" />
+                <span data-valmsg-for="InvoiceDetails[@index].Product" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="@quantityId" class="form-label">Quantity</label>
+                <input type="number" id="@quantityId" name="InvoiceDetails[@index].Quantity" class="form-control" value="@Model.Quantity" />
+                <span data-valmsg-for="InvoiceDetails[@index].Quantity" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="@priceId" class="form-label">Price</label>
+                <input type="number" id="@priceId" name="InvoiceDetails[@index].Price" step="0.01" class="form-control" value="@Model.Price" />
+                <span data-valmsg-for="InvoiceDetails[@index].Price" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 d-flex align-items-end mb-3">
+                <button type="button" class="btn btn-danger remove-row-btn">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>

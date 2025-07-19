@@ -1,0 +1,51 @@
+﻿@model InvoiceWebApp.DTOS.Account.LoginDTO
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Login</h3>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="CaptchaToken" class="form-label">Captcha:</label>
+                        <div class="input-group">
+                            <input asp-for="CaptchaToken" class="form-control" />
+                            <span class="input-group-text bg-light text-dark fw-bold" id="captchaDisplay">@ViewBag.Captcha</span>
+                        </div>
+                        <span asp-validation-for="CaptchaToken" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" asp-for="RememberMe" />
+                        <label class="form-check-label" asp-for="RememberMe">Remember me?</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-secondary">Register</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+        });
+    </script>
+}

@@ -1,0 +1,61 @@
+﻿@model InvoiceWebApp.Models.Invoice
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<h2 class="mb-4">Invoice Details #@Model.Id</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">User:</dt>
+        <dd class="col-sm-9">@Model.User.FullName (@Model.User.Username)</dd>
+
+        <dt class="col-sm-3">Invoice Date:</dt>
+        <dd class="col-sm-9">@Model.Date.ToString("yyyy-MM-dd")</dd>
+
+        <dt class="col-sm-3">Total Amount:</dt>
+        <dd class="col-sm-9"><strong>@Model.TotalAmount.ToString("C")</strong></dd>
+
+        <dt class="col-sm-3">Created At:</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+    </dl>
+
+    <h3>Product Details:</h3>
+    @if (!Model.InvoiceDetails.Any())
+    {
+        <p>No product details for this invoice.</p>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detail in Model.InvoiceDetails)
+                {
+                    <tr>
+                        <td>@detail.Product</td>
+                        <td>@detail.Quantity</td>
+                        <td>@detail.Price.ToString("C")</td>
+                        <td>@detail.Total.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<div class="mt-4">
+    <a asp-controller="Invoice" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-controller="Invoice" asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <form asp-controller="Invoice" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
+          onsubmit="return confirm('Are you sure you want to delete invoice #@Model.Id?');">
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>
